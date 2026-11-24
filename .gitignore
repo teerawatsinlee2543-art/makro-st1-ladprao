@@ -1,0 +1,3 @@
+# private team data and local tooling stay on this PC, never in the public repo
+old-db-snapshot/
+tools/

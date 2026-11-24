@@ -1,0 +1,11 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Makro ST 1 Ladprao team data (own Firebase project, NOT the Store 42 one).
+    // Everyone who has the app link can read and write (no login) - the same openness the Store 42 apps have.
+    // Tighten this (e.g. require Firebase Authentication) if the link is ever shared outside the team.
+    match /makroFinder/{doc=**} {
+      allow read, write: if true;
+    }
+  }
+}
