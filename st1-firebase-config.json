@@ -1,6 +1,7 @@
 {
   "apiKey": "AIzaSyAqN_-gwi5opMFL8ExUX1b2NXbK-RL1d_Y",
   "authDomain": "makro-st1-ladprao.firebaseapp.com",
+  "databaseURL": "https://makro-st1-ladprao-default-rtdb.asia-southeast1.firebasedatabase.app",
   "projectId": "makro-st1-ladprao",
   "storageBucket": "makro-st1-ladprao.firebasestorage.app",
   "messagingSenderId": "886664831343",

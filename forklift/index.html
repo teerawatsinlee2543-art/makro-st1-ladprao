@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="th">
+<head><script>/* ST1 Ladprao: own browser storage (same github.io origin as the other Makro apps) */(function(){var P="st1.";try{var S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};S.removeItem=function(k){return r.call(this,P+k)};S.clear=function(){var a=[],i,k;for(i=0;i<this.length;i++){k=this.key(i);if(k&&k.indexOf(P)===0)a.push(k)}for(i=0;i<a.length;i++)r.call(this,a[i])}}catch(e){}try{var F=IDBFactory.prototype,o=F.open,d=F.deleteDatabase;F.open=function(n){var a=Array.prototype.slice.call(arguments);a[0]=P+n;return o.apply(this,a)};F.deleteDatabase=function(n){var a=Array.prototype.slice.call(arguments);a[0]=P+n;return d.apply(this,a)}}catch(e){}})();</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>เบิกกุญแจโฟล์คลิฟท์ - Makro ST 1</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{--red:#E8192C;--red-dark:#C01020;--red-light:#FFF0F1;--green:#006E33;--green-light:#F0FAF4}
+body{background:#f5f5f5;font-family:'Sarabun',sans-serif;min-height:100vh}
+.phone{background:#fff;max-width:430px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--red);padding:18px 16px 14px;text-align:center}
+.hdr-icon{font-size:30px;margin-bottom:4px}
+.hdr-title{font-size:22px;font-weight:600;color:#fff}
+.hdr-date{font-size:12px;color:rgba(255,255,255,.75);margin-top:3px}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;padding:12px 12px 0;background:#fff;border-bottom:1px solid #eee;gap:4px}
+.tab-btn{padding:11px 4px;border-radius:10px 10px 0 0;font-size:13.5px;font-weight:500;cursor:pointer;border:1px solid #ddd;border-bottom:none;background:#f8f8f8;color:#888}
+.tab-btn.active{background:var(--red-light);color:var(--red);border-color:var(--red)}
+.body{padding:16px;flex:1}
+.field-label{font-size:14px;font-weight:500;color:#333;margin-bottom:8px}
+.req{color:var(--red)}
+.key-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:20px}
+.key-btn{aspect-ratio:1;border-radius:10px;border:1px solid #ddd;background:#fff;font-size:17px;font-weight:500;color:#333;cursor:pointer}
+.key-btn.selected{background:var(--red);color:#fff;border-color:var(--red)}
+.key-btn:disabled{background:#f0f0f0;color:#ccc;cursor:not-allowed}
+.inp{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:10px;font-size:15px;color:#333;font-family:inherit;outline:none;margin-bottom:20px}
+.inp:focus{border-color:var(--red)}
+.inp::placeholder{color:#bbb}
+select.inp{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
+.warning{background:#FFF8E1;border:1px solid #FFD54F;border-radius:8px;padding:9px 12px;font-size:13px;color:#8B6A00;margin-bottom:20px;display:flex;align-items:center;gap:6px}
+.submit-btn{width:100%;padding:15px;border-radius:12px;border:none;font-size:17px;font-weight:600;cursor:pointer;font-family:inherit}
+.submit-btn.borrow{background:var(--red);color:#fff}
+.submit-btn.return-btn{background:var(--green);color:#fff}
+.submit-btn:disabled{background:#ddd;color:#aaa;cursor:default}
+.return-card{border:1px solid #eee;border-radius:12px;overflow:hidden}
+.return-item{padding:14px;border-bottom:1px solid #f0f0f0;display:flex;align-items:center;justify-content:space-between}
+.return-item:last-child{border-bottom:none}
+.ri-key{font-size:16px;font-weight:600;color:#1a1a1a}
+.ri-meta{font-size:13px;color:#888;margin-top:2px}
+.ri-btn{background:var(--green-light);color:var(--green);border:1px solid #9FE1CB;border-radius:8px;padding:7px 16px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit}
+.empty{text-align:center;padding:48px 16px;color:#bbb}
+.success-screen{text-align:center;padding:32px 16px}
+.success-icon{font-size:52px;margin-bottom:12px}
+.success-title{font-size:20px;font-weight:600;color:#1a1a1a;margin-bottom:6px}
+.success-sub{font-size:14px;color:#888;margin-bottom:24px}
+.success-card{background:#f8f9fb;border-radius:12px;padding:16px;text-align:left;margin-bottom:24px;border:1px solid #eee}
+.sc-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #f0f0f0}
+.sc-row:last-child{border-bottom:none}
+.sc-label{color:#888}
+.sc-val{font-weight:600;color:#1a1a1a}
+.back-btn{background:#f0f0f0;color:#555;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit}
+.sig-wrap{margin-bottom:20px}
+.sig-canvas{width:100%;height:160px;border:1.5px dashed #ddd;border-radius:10px;display:block;touch-action:none;cursor:crosshair;background:#fafafa}
+.sig-canvas.signed{border-color:var(--green);border-style:solid;background:#fff}
+.sig-actions{display:flex;justify-content:flex-end;margin-top:6px}
+.sig-clear{background:none;border:none;font-size:13px;color:#aaa;cursor:pointer;padding:4px 8px;font-family:inherit}
+.sig-clear:hover{color:var(--red)}
+.sig-hint{font-size:12px;color:#bbb;text-align:center;margin-top:4px}
+.dash-day{font-size:13px;font-weight:600;color:#aaa;margin:16px 0 8px}
+.dash-day:first-child{margin-top:0}
+.dash-badge{font-size:12px;font-weight:600;border-radius:6px;padding:2px 7px;margin-right:6px}
+.dash-badge.borrow{background:var(--red-light);color:var(--red)}
+.dash-badge.return-b{background:var(--green-light);color:var(--green)}
+.dash-badge.return-late{background:var(--red-light);color:var(--red)}
+.dash-badge.warn{background:#FFF8E1;color:#8B6A00}
+.hist-green{background:var(--green-light);border-left:4px solid var(--green)}
+.hist-yellow{background:#FFF8E1;border-left:4px solid #FFD54F}
+.hist-red{background:var(--red-light);border-left:4px solid var(--red)}
+.hist-reason{font-size:12.5px;color:#8B6A00;margin-top:4px;font-style:italic}
+.pin-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.pin-box{background:#fff;border-radius:16px;padding:26px 20px;width:100%;max-width:320px;text-align:center}
+.pin-title{font-size:16px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.pin-sub{font-size:13px;color:#888;margin-bottom:16px}
+.pin-input{width:100%;padding:14px;border:1.5px solid #ddd;border-radius:10px;font-size:26px;letter-spacing:14px;text-align:center;outline:none;margin-bottom:8px;font-family:inherit}
+.pin-input:focus{border-color:var(--green)}
+.pin-error{color:var(--red);font-size:13px;margin-bottom:8px;min-height:16px}
+.pin-actions{display:flex;gap:10px;margin-top:8px}
+.pin-cancel,.pin-confirm{flex:1;padding:12px;border-radius:10px;border:none;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+.pin-cancel{background:#f0f0f0;color:#555}
+.pin-confirm{background:var(--green);color:#fff}
+.dash-btn{display:block;margin:10px auto 0;background:var(--green-light);color:var(--green);border:1px solid #9FE1CB}
+.alert-banner{background:#FFF8E1;border-bottom:1px solid #FFD54F;color:#8B6A00;font-size:13px;padding:10px 16px;line-height:1.6}
+.lock-badge{font-size:12.5px;font-weight:600;color:#999;background:#f0f0f0;border-radius:8px;padding:7px 12px;white-space:nowrap;text-align:center}
+.lock-badge.soon{color:#8B6A00;background:#FFF8E1;border:1px solid #FFD54F}
+.overdue-block{background:var(--red-light);border:1px solid #F8B7BC;border-radius:10px;padding:14px;margin-bottom:20px}
+.overdue-title{font-size:14px;font-weight:600;color:var(--red);margin-bottom:10px}
+textarea.inp{min-height:70px;resize:vertical;font-family:inherit}
+.pin-row{margin-bottom:10px}
+.pin-row-label{font-size:12.5px;color:#888;margin-bottom:4px;text-align:left}
+.hist-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;padding-bottom:2px}
+.hist-tab-btn{flex:0 0 auto;padding:8px 14px;border-radius:20px;border:1px solid #ddd;background:#f8f8f8;color:#888;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;white-space:nowrap}
+.hist-tab-btn[data-cat="all"].active{background:#333;border-color:#333;color:#fff}
+.hist-tab-btn[data-cat="borrow"].active{background:var(--red);border-color:var(--red);color:#fff}
+.hist-tab-btn[data-cat="green"].active{background:var(--green);border-color:var(--green);color:#fff}
+.hist-tab-btn[data-cat="red"].active{background:var(--red-dark);border-color:var(--red-dark);color:#fff}
+.hist-tab-btn[data-cat="warning"].active{background:#F5A623;border-color:#F5A623;color:#1a1a1a}
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="phone">
+  <div class="hdr">
+    <div style="font-size:22px;font-weight:600;color:#fff;letter-spacing:.04em;margin-bottom:2px">ST. 1 ลาดพร้าว</div>
+    <div class="hdr-icon">🔑</div>
+    <div class="hdr-title">เบิกกุญแจโฟล์คลิฟท์</div>
+    <div class="hdr-date" id="hdrDate"></div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-borrow" onclick="switchTab('borrow')">เบิกกุญแจ</button>
+    <button class="tab-btn" id="tab-return" onclick="switchTab('return')">คืนกุญแจ</button>
+    <button class="tab-btn" id="tab-dashboard" onclick="switchTab('dashboard')">ประวัติการใช้</button>
+  </div>
+  <div class="alert-banner" id="alertBanner" style="display:none"></div>
+  <div class="body">
+    <div id="view-borrow">
+      <div class="field-label">เบอร์กุญแจที่เบิก <span class="req">*</span></div>
+      <div class="key-grid" id="keyGrid"></div>
+      <div class="field-label">ชื่อผู้เบิก <span class="req">*</span></div>
+      <input class="inp" type="text" id="borrowName" placeholder="ชื่อ-นามสกุล" oninput="validateBorrow()">
+      <div class="field-label">แผนก <span class="req">*</span></div>
+      <select class="inp" id="borrowDept" onchange="validateBorrow()">
+        <option value="">เลือกแผนก</option>
+        <option value="FV">FV</option>
+        <option value="FS">FS</option>
+        <option value="BU">BU</option>
+        <option value="BK">BK</option>
+        <option value="DAILY FZ">DAILY FZ</option>
+        <option value="DF 1">DF 1</option>
+        <option value="DF 2">DF 2</option>
+        <option value="NF 1">NF 1</option>
+        <option value="NF 2">NF 2</option>
+        <option value="GR">GR</option>
+        <option value="O2O">O2O</option>
+        <option value="SAFETY">SAFETY</option>
+      </select>
+      <div class="field-label">เลขบัตรใบอนุญาตขับโฟล์คลิฟท์ <span class="req">*</span></div>
+      <input class="inp" type="tel" id="licenseNo" maxlength="5" placeholder="กรอกเลขใบอนุญาต 5 หลัก" oninput="onLicense(this)">
+      <div class="warning">⚠️ ต้องกรอกเลขใบอนุญาต 5 หลักก่อนจึงจะเบิกได้</div>
+      <button class="submit-btn borrow" id="borrowBtn" disabled onclick="submitBorrow()">✓ ยืนยันการเบิกกุญแจ</button>
+    </div>
+    <div id="view-return" style="display:none">
+      <div id="returnList"></div>
+    </div>
+    <div id="view-sign" style="display:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px;cursor:pointer" onclick="backToReturnList()">
+        <span style="font-size:20px;color:var(--red)">&#8592;</span>
+        <span style="font-size:14px;color:var(--red);font-weight:500">กลับเลือกกุญแจ</span>
+      </div>
+      <div class="success-card" id="signKeyInfo" style="margin-bottom:20px"></div>
+      <div class="field-label">เซ็นชื่อยืนยันการคืน <span class="req">*</span></div>
+      <div class="sig-wrap">
+        <canvas class="sig-canvas" id="sigCanvas"></canvas>
+        <div class="sig-hint">ใช้นิ้วเซ็นชื่อในกรอบด้านบน</div>
+        <div class="sig-actions">
+          <button class="sig-clear" onclick="clearSig()">ล้างลายเซ็น ✕</button>
+        </div>
+      </div>
+      <div id="overdueBlock" class="overdue-block" style="display:none">
+        <div class="overdue-title">⚠️ เกินกำหนดเวลาคืน 3 ชั่วโมง ต้องระบุเหตุผลและให้ผู้กำกับเซ็นยืนยัน</div>
+        <div class="field-label">เหตุผลที่คืนล่าช้า <span class="req">*</span></div>
+        <textarea class="inp" id="overdueReason" rows="2" placeholder="ระบุเหตุผล" oninput="onOverdueChange()"></textarea>
+        <div class="field-label">ลายเซ็นกำกับ (หัวหน้างาน/ผู้รับผิดชอบ) <span class="req">*</span></div>
+        <div class="sig-wrap">
+          <canvas class="sig-canvas" id="sigCanvas2"></canvas>
+          <div class="sig-hint">ใช้นิ้วเซ็นชื่อในกรอบด้านบน</div>
+          <div class="sig-actions">
+            <button class="sig-clear" onclick="clearSig2()">ล้างลายเซ็น ✕</button>
+          </div>
+        </div>
+      </div>
+      <button class="submit-btn return-btn" id="signConfirmBtn" disabled onclick="requestPin()">✓ ยืนยันการคืนกุญแจ</button>
+    </div>
+    <div id="view-success" style="display:none">
+      <div class="success-screen">
+        <div class="success-icon" id="successIcon"></div>
+        <div class="success-title" id="successTitle"></div>
+        <div class="success-sub" id="successSub"></div>
+        <div class="success-card" id="successCard"></div>
+        <button class="back-btn" onclick="goHome()">กลับหน้าหลัก</button>
+        <button class="back-btn dash-btn" id="successDashboardBtn" style="display:none" onclick="goDashboardFromSuccess()">📊 ดูประวัติการใช้งาน</button>
+      </div>
+    </div>
+    <div id="view-dashboard" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:10px">
+        <div class="field-label" style="margin-bottom:0">ประวัติการใช้งาน (ย้อนหลัง 6 เดือน)</div>
+        <button class="ri-btn" style="white-space:nowrap" onclick="exportHistoryCSV()">📥 Export Excel</button>
+      </div>
+      <div class="warning" style="margin-bottom:14px">🗓️ ข้อมูลจะถูกล้างอัตโนมัติทุกวันที่ 5 ของเดือน</div>
+      <div class="hist-tabs" id="histTabs">
+        <button class="hist-tab-btn" data-cat="all" onclick="switchHistCat('all')">รวม</button>
+        <button class="hist-tab-btn" data-cat="borrow" onclick="switchHistCat('borrow')">เบิก</button>
+        <button class="hist-tab-btn" data-cat="green" onclick="switchHistCat('green')">คืนตรงเวลา</button>
+        <button class="hist-tab-btn" data-cat="red" onclick="switchHistCat('red')">คืนเกินกำหนด</button>
+        <button class="hist-tab-btn" data-cat="warning" onclick="switchHistCat('warning')">แจ้งเตือน</button>
+      </div>
+      <div id="dashboardList"></div>
+    </div>
+  </div>
+</div>
+<div class="pin-overlay" id="pinOverlay" style="display:none">
+  <div class="pin-box">
+    <div class="pin-title" id="pinTitle">กรอกรหัส PIN</div>
+    <div class="pin-sub" id="pinSub">ยืนยันตัวตนก่อนคืนกุญแจ</div>
+    <div class="pin-row">
+      <div class="pin-row-label" id="pinRowLabel1" style="display:none">รหัส PIN คนที่ 1</div>
+      <input class="pin-input" id="pinInput" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')verifyPin()">
+    </div>
+    <div class="pin-row" id="pinRow2" style="display:none">
+      <div class="pin-row-label">รหัส PIN คนที่ 2 (ต้องไม่ซ้ำกับคนที่ 1)</div>
+      <input class="pin-input" id="pinInput2" type="password" inputmode="numeric" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')verifyPin()">
+    </div>
+    <div class="pin-error" id="pinError" style="visibility:hidden">รหัส PIN ไม่ถูกต้อง</div>
+    <div class="pin-actions">
+      <button class="pin-cancel" onclick="closePinModal()">ยกเลิก</button>
+      <button class="pin-confirm" onclick="verifyPin()">ยืนยัน</button>
+    </div>
+  </div>
+</div>
+<script>
+const firebaseConfig={apiKey:"AIzaSyAqN_-gwi5opMFL8ExUX1b2NXbK-RL1d_Y",authDomain:"makro-st1-ladprao.firebaseapp.com",databaseURL:"https://makro-st1-ladprao-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"makro-st1-ladprao",storageBucket:"makro-st1-ladprao.firebasestorage.app",messagingSenderId:"886664831343",appId:"1:886664831343:web:f51e7f3e098548cc14c89a"};
+firebase.initializeApp(firebaseConfig);
+const db=firebase.database();
+const borrowedRef=db.ref('borrowed');
+const historyRef=db.ref('history');
+const purgeCycleRef=db.ref('meta/purgeCycle');
+function keyNode(k){return 'k'+k;}
+
+const KEYS=30;
+const VALID_PINS=['0042','4200','4242'];
+const HISTORY_DAYS=180;
+const LOCK_MS=3*60*60*1000;
+const WARN_LEAD=30*60*1000;
+let selectedKey=null,borrowedMap={},historyList=[],currentTab='borrow',pendingReturnKey=null,isOverdueReturn=false,dashboardFilter='all';
+let sigCanvas,sigCtx,isSigning=false,hasSig=false,lastX=0,lastY=0;
+let sigCanvas2,sigCtx2,isSigning2=false,hasSig2=false,lastX2=0,lastY2=0;
+let notifiedLocally=new Set();
+
+function loadHistory(){
+  const cutoff=Date.now()-HISTORY_DAYS*24*60*60*1000;
+  return historyList.filter(e=>e.ts>=cutoff);
+}
+function addHistory(entry){
+  historyRef.push(entry);
+}
+
+function currentPurgeCycle(d){
+  const y=d.getFullYear(),m=d.getMonth();
+  if(d.getDate()>=5)return `${y}-${m}`;
+  const pm=m===0?11:m-1,py=m===0?y-1:y;
+  return `${py}-${pm}`;
+}
+  function purgeHistoryIfNeeded(){
+  const cycle=currentPurgeCycle(new Date());
+
+  purgeCycleRef.transaction(current=>{
+    if(current===cycle)return;
+    return cycle;
+  },(error,committed)=>{
+    if(!error && committed){
+      historyRef.remove();
+    }
+  });
+}
+
+function csvEscape(v){
+  const s = String(v == null ? '' : v);
+
+  return /[",\r\n]/.test(s)
+    ? '"' + s.replace(/"/g,'""') + '"'
+    : s;
+}
+function exportHistoryCSV(){
+
+  const h = loadHistory().sort((a,b)=>a.ts-b.ts);
+
+  const returns = h.filter(e=>e.type==='return');
+
+  if(!returns.length){
+    alert('ไม่มีข้อมูลคืนกุญแจให้ส่งออก');
+    return;
+  }
+
+  const headers = [
+    'วันที่เบิก',
+    'เวลาเบิก',
+    'วันที่คืน',
+    'เวลาคืน',
+    'ประเภท',
+    'หมายเลขกุญแจ',
+    'ชื่อ-สกุล',
+    'แผนก',
+    'เหตุผลคืนช้า'
+  ];
+
+  const rows = returns.map(e=>{
+
+    const borrowDate = e.borrowedAt ? new Date(e.borrowedAt) : null;
+    const returnDate = e.returnedAt ? new Date(e.returnedAt) : null;
+
+    return [
+      borrowDate ? borrowDate.toLocaleDateString('th-TH') : '',
+      borrowDate ? borrowDate.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '',
+      returnDate ? returnDate.toLocaleDateString('th-TH') : '',
+      returnDate ? returnDate.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '',
+      e.status === 'red' ? 'คืนเกินกำหนด' : 'คืนตรงเวลา',
+      e.key,
+      e.name,
+      e.dept,
+      e.reason || ''
+    ];
+
+  });
+
+  const csv = [headers,...rows]
+    .map(r=>r.map(csvEscape).join(','))
+    .join('\r\n');
+
+  const blob = new Blob(
+    ["\uFEFF" + csv],
+    { type:'text/csv;charset=utf-8;' }
+  );
+
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = 'forklift-history.csv';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(link.href);
+
+}
+function fmtRemain(ms){
+  const totalMin=Math.max(0,Math.ceil(ms/60000));
+  const h=Math.floor(totalMin/60),m=totalMin%60;
+  return h>0?`${h} ชม. ${m} นาที`:`${m} นาที`;
+}
+
+function notifyUser(msg){
+  if('Notification' in window && Notification.permission==='granted'){
+    new Notification('แจ้งเตือนคืนกุญแจ',{body:msg});
+  }
+}
+
+function renderAlertBanner(){
+  const el=document.getElementById('alertBanner');
+  const now=Date.now();
+  const warns=Object.values(borrowedMap).filter(b=>{const remain=LOCK_MS-(now-b.borrowedAt);return remain>0&&remain<=WARN_LEAD;});
+  if(!warns.length){el.style.display='none';el.innerHTML='';return;}
+  el.style.display='block';
+  el.innerHTML=warns.map(b=>`⏰ กุญแจ #${b.key} (${b.name}) จะครบกำหนดคืนใน ${fmtRemain(LOCK_MS-(now-b.borrowedAt))}`).join('<br>');
+}
+
+function tick(){
+  const now=Date.now();
+  Object.values(borrowedMap).forEach(b=>{
+    const remain=LOCK_MS-(now-b.borrowedAt);
+    if(remain>0&&remain<=WARN_LEAD){
+      if(!notifiedLocally.has(b.key)){
+        notifiedLocally.add(b.key);
+        notifyUser(`กุญแจ #${b.key} (${b.name}) จะครบกำหนดคืนใน 30 นาที`);
+      }
+      if(!b.notified30){
+        borrowedRef.child(keyNode(b.key)+'/notified30').transaction(cur=>{
+          if(cur===true)return;
+          return true;
+        },(error,committed)=>{
+          if(!error&&committed)addHistory({ts:Date.now(),type:'warning',key:b.key,name:b.name,dept:b.dept});
+        });
+      }
+    }
+  });
+  renderAlertBanner();
+  if(currentTab==='return')renderReturn();
+}
+
+function init(){
+  const now=new Date();
+  document.getElementById('hdrDate').textContent='วันที่ '+now.toLocaleDateString('th-TH',{weekday:'short',year:'numeric',month:'short',day:'numeric'})+' เวลา '+now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})+' น.';
+  purgeHistoryIfNeeded();
+  buildKeyGrid();renderReturn();
+
+  borrowedRef.on('value',snapshot=>{
+    const val=snapshot.val()||{};
+    const map={};
+    Object.keys(val).forEach(nodeKey=>{const b=val[nodeKey];map[b.key]=b;});
+    borrowedMap=map;
+    buildKeyGrid();
+    if(currentTab==='return')renderReturn();
+    renderAlertBanner();
+  });
+
+  historyRef.on('value',snapshot=>{
+    const val=snapshot.val()||{};
+    historyList=Object.values(val);
+    if(currentTab==='dashboard')renderDashboard();
+  });
+
+  tick();
+  setInterval(tick,15000);
+}
+
+function buildKeyGrid(){
+  const g=document.getElementById('keyGrid');g.innerHTML='';
+  for(let i=1;i<=KEYS;i++){
+    const b=borrowedMap[i];
+    const btn=document.createElement('button');
+    btn.className='key-btn'+(selectedKey===i?' selected':'');
+    btn.textContent=i;
+    if(b)btn.disabled=true;
+    btn.onclick=()=>selectKey(i);
+    g.appendChild(btn);
+  }
+}
+function selectKey(k){if(borrowedMap[k])return;selectedKey=selectedKey===k?null:k;buildKeyGrid();validateBorrow();}
+function onLicense(el){el.value=el.value.replace(/\D/g,'');validateBorrow();}
+function validateBorrow(){
+  const ok=selectedKey&&document.getElementById('borrowName').value.trim().length>1&&document.getElementById('borrowDept').value&&document.getElementById('licenseNo').value.length===5;
+  document.getElementById('borrowBtn').disabled=!ok;
+}
+function submitBorrow(){
+  const now=new Date();const tm=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  const key=selectedKey;
+  const entry={key,name:document.getElementById('borrowName').value.trim(),dept:document.getElementById('borrowDept').value,license:document.getElementById('licenseNo').value,time:tm,borrowedAt:Date.now(),notified30:false};
+  document.getElementById('borrowBtn').disabled=true;
+  borrowedRef.child(keyNode(key)).transaction(current=>{
+    if(current!==null)return;
+    return entry;
+  },(error,committed)=>{
+    if(error){alert('เกิดข้อผิดพลาด กรุณาลองใหม่: '+error.message);validateBorrow();return;}
+    if(!committed){
+      alert('กุญแจ #'+key+' เพิ่งถูกเบิกไปโดยเครื่องอื่น กรุณาเลือกเบอร์อื่น');
+      selectedKey=null;buildKeyGrid();
+      return;
+    }
+   addHistory({
+  ts:Date.now(),
+  type:'borrow',
+  key:entry.key,
+  name:entry.name,
+  dept:entry.dept,
+  license:entry.license,
+  borrowedAt:entry.borrowedAt
+});
+    if('Notification' in window && Notification.permission==='default'){Notification.requestPermission();}
+    showSuccess('✅','เบิกกุญแจสำเร็จ!','กุญแจ #'+entry.key+' พร้อมใช้งาน',
+      `<div class="sc-row"><span class="sc-label">กุญแจ</span><span class="sc-val">#${entry.key}</span></div>
+       <div class="sc-row"><span class="sc-label">ผู้เบิก</span><span class="sc-val">${entry.name}</span></div>
+       <div class="sc-row"><span class="sc-label">แผนก</span><span class="sc-val">${entry.dept}</span></div>
+       <div class="sc-row"><span class="sc-label">ใบอนุญาต</span><span class="sc-val">${entry.license}</span></div>
+       <div class="sc-row"><span class="sc-label">เวลา</span><span class="sc-val">${entry.time} น.</span></div>`,false);
+    selectedKey=null;
+    document.getElementById('borrowName').value='';
+    document.getElementById('borrowDept').value='';
+    document.getElementById('licenseNo').value='';
+    buildKeyGrid();
+  });
+}
+
+function renderReturn(){
+  const el=document.getElementById('returnList');
+  const list=Object.values(borrowedMap).sort((a,b)=>a.borrowedAt-b.borrowedAt);
+  if(!list.length){el.innerHTML='<div class="empty"><p style="font-size:16px">ยังไม่มีกุญแจที่ถูกเบิก</p></div>';return;}
+  const now=Date.now();
+  el.innerHTML='<div class="field-label" style="margin-bottom:10px">เลือกกุญแจที่จะคืน <span class="req">*</span></div>'+
+    '<div class="warning" style="margin-bottom:14px">⏰ ควรคืนภายใน 3 ชั่วโมงหลังเบิก มิฉะนั้นถือว่าเกินกำหนด</div>'+
+    '<div class="return-card">'+
+    list.map(b=>{
+      const remain=LOCK_MS-(now-b.borrowedAt);
+      const overdue=remain<=0;
+      const statusTag=overdue
+        ?`<div class="lock-badge" style="color:var(--red);background:var(--red-light);border:1px solid #F8B7BC">เกินกำหนด ${fmtRemain(-remain)}</div>`
+        :`<div class="lock-badge${remain<=WARN_LEAD?' soon':''}">ครบกำหนดใน ${fmtRemain(remain)}</div>`;
+      return `
+      <div class="return-item">
+        <div><div class="ri-key">กุญแจ #${b.key}</div><div class="ri-meta">${b.name} (${b.dept}) · เบิก ${b.time} น.</div></div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+          ${statusTag}
+          <button class="ri-btn" onclick="openSignature(${b.key})">เลือก</button>
+        </div>
+      </div>`;
+    }).join('')+
+    '</div>';
+}
+
+function openSignature(key){
+  const entry=borrowedMap[key];
+  if(!entry)return;
+  pendingReturnKey=key;
+  isOverdueReturn=(Date.now()-entry.borrowedAt)>LOCK_MS;
+  document.getElementById('view-return').style.display='none';
+  document.getElementById('view-sign').style.display='block';
+  document.getElementById('signKeyInfo').innerHTML=
+    `<div class="sc-row"><span class="sc-label">กุญแจ</span><span class="sc-val">#${entry.key}</span></div>
+     <div class="sc-row"><span class="sc-label">ผู้เบิก</span><span class="sc-val">${entry.name}</span></div>
+     <div class="sc-row"><span class="sc-label">แผนก</span><span class="sc-val">${entry.dept}</span></div>
+     <div class="sc-row"><span class="sc-label">เวลาเบิก</span><span class="sc-val">${entry.time} น.</span></div>`;
+  document.getElementById('overdueBlock').style.display=isOverdueReturn?'block':'none';
+  document.getElementById('overdueReason').value='';
+  initSigPad();
+  if(isOverdueReturn)initSigPad2();else{hasSig2=false;}
+  updateSignConfirmState();
+}
+
+function onOverdueChange(){updateSignConfirmState();}
+
+function updateSignConfirmState(){
+  const reasonOk=!isOverdueReturn||document.getElementById('overdueReason').value.trim().length>0;
+  const sig2Ok=!isOverdueReturn||hasSig2;
+  document.getElementById('signConfirmBtn').disabled=!(hasSig&&reasonOk&&sig2Ok);
+}
+
+function initSigPad(){
+  sigCanvas=document.getElementById('sigCanvas');
+  sigCtx=sigCanvas.getContext('2d');
+  const rect=sigCanvas.getBoundingClientRect();
+  sigCanvas.width=rect.width*window.devicePixelRatio||sigCanvas.offsetWidth*2;
+  sigCanvas.height=rect.height*window.devicePixelRatio||320;
+  sigCtx.scale(window.devicePixelRatio||2,window.devicePixelRatio||2);
+  sigCtx.strokeStyle='#1a1a1a';sigCtx.lineWidth=2.5;sigCtx.lineCap='round';sigCtx.lineJoin='round';
+  hasSig=false;isSigning=false;
+  sigCanvas.classList.remove('signed');
+  document.getElementById('signConfirmBtn').disabled=true;
+
+  function getPos(e){
+    const r=sigCanvas.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return{x:src.clientX-r.left,y:src.clientY-r.top};
+  }
+  function startDraw(e){e.preventDefault();isSigning=true;const p=getPos(e);lastX=p.x;lastY=p.y;sigCtx.beginPath();sigCtx.moveTo(p.x,p.y);}
+  function draw(e){e.preventDefault();if(!isSigning)return;const p=getPos(e);sigCtx.lineTo(p.x,p.y);sigCtx.stroke();lastX=p.x;lastY=p.y;if(!hasSig){hasSig=true;sigCanvas.classList.add('signed');updateSignConfirmState();}}
+  function endDraw(e){e.preventDefault();isSigning=false;}
+
+  sigCanvas.removeEventListener('mousedown',sigCanvas._md);
+  sigCanvas.removeEventListener('mousemove',sigCanvas._mm);
+  sigCanvas.removeEventListener('mouseup',sigCanvas._mu);
+  sigCanvas.removeEventListener('touchstart',sigCanvas._ts);
+  sigCanvas.removeEventListener('touchmove',sigCanvas._tm);
+  sigCanvas.removeEventListener('touchend',sigCanvas._te);
+
+  sigCanvas._md=startDraw;sigCanvas._mm=draw;sigCanvas._mu=endDraw;
+  sigCanvas._ts=startDraw;sigCanvas._tm=draw;sigCanvas._te=endDraw;
+
+  sigCanvas.addEventListener('mousedown',sigCanvas._md);
+  sigCanvas.addEventListener('mousemove',sigCanvas._mm);
+  sigCanvas.addEventListener('mouseup',sigCanvas._mu);
+  sigCanvas.addEventListener('touchstart',sigCanvas._ts,{passive:false});
+  sigCanvas.addEventListener('touchmove',sigCanvas._tm,{passive:false});
+  sigCanvas.addEventListener('touchend',sigCanvas._te,{passive:false});
+}
+
+function clearSig(){
+  if(!sigCtx)return;
+  sigCtx.clearRect(0,0,sigCanvas.width,sigCanvas.height);
+  hasSig=false;sigCanvas.classList.remove('signed');
+  updateSignConfirmState();
+}
+
+function initSigPad2(){
+  sigCanvas2=document.getElementById('sigCanvas2');
+  sigCtx2=sigCanvas2.getContext('2d');
+  const rect=sigCanvas2.getBoundingClientRect();
+  sigCanvas2.width=rect.width*window.devicePixelRatio||sigCanvas2.offsetWidth*2;
+  sigCanvas2.height=rect.height*window.devicePixelRatio||320;
+  sigCtx2.scale(window.devicePixelRatio||2,window.devicePixelRatio||2);
+  sigCtx2.strokeStyle='#1a1a1a';sigCtx2.lineWidth=2.5;sigCtx2.lineCap='round';sigCtx2.lineJoin='round';
+  hasSig2=false;isSigning2=false;
+  sigCanvas2.classList.remove('signed');
+
+  function getPos(e){
+    const r=sigCanvas2.getBoundingClientRect();
+    const src=e.touches?e.touches[0]:e;
+    return{x:src.clientX-r.left,y:src.clientY-r.top};
+  }
+  function startDraw(e){e.preventDefault();isSigning2=true;const p=getPos(e);lastX2=p.x;lastY2=p.y;sigCtx2.beginPath();sigCtx2.moveTo(p.x,p.y);}
+  function draw(e){e.preventDefault();if(!isSigning2)return;const p=getPos(e);sigCtx2.lineTo(p.x,p.y);sigCtx2.stroke();lastX2=p.x;lastY2=p.y;if(!hasSig2){hasSig2=true;sigCanvas2.classList.add('signed');updateSignConfirmState();}}
+  function endDraw(e){e.preventDefault();isSigning2=false;}
+
+  sigCanvas2.removeEventListener('mousedown',sigCanvas2._md);
+  sigCanvas2.removeEventListener('mousemove',sigCanvas2._mm);
+  sigCanvas2.removeEventListener('mouseup',sigCanvas2._mu);
+  sigCanvas2.removeEventListener('touchstart',sigCanvas2._ts);
+  sigCanvas2.removeEventListener('touchmove',sigCanvas2._tm);
+  sigCanvas2.removeEventListener('touchend',sigCanvas2._te);
+
+  sigCanvas2._md=startDraw;sigCanvas2._mm=draw;sigCanvas2._mu=endDraw;
+  sigCanvas2._ts=startDraw;sigCanvas2._tm=draw;sigCanvas2._te=endDraw;
+
+  sigCanvas2.addEventListener('mousedown',sigCanvas2._md);
+  sigCanvas2.addEventListener('mousemove',sigCanvas2._mm);
+  sigCanvas2.addEventListener('mouseup',sigCanvas2._mu);
+  sigCanvas2.addEventListener('touchstart',sigCanvas2._ts,{passive:false});
+  sigCanvas2.addEventListener('touchmove',sigCanvas2._tm,{passive:false});
+  sigCanvas2.addEventListener('touchend',sigCanvas2._te,{passive:false});
+}
+
+function clearSig2(){
+  if(!sigCtx2)return;
+  sigCtx2.clearRect(0,0,sigCanvas2.width,sigCanvas2.height);
+  hasSig2=false;sigCanvas2.classList.remove('signed');
+  updateSignConfirmState();
+}
+
+function backToReturnList(){
+  document.getElementById('view-sign').style.display='none';
+  document.getElementById('view-return').style.display='block';
+  pendingReturnKey=null;
+}
+
+function requestPin(){
+  if(document.getElementById('signConfirmBtn').disabled||!pendingReturnKey)return;
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinInput2').value='';
+  document.getElementById('pinError').style.visibility='hidden';
+  document.getElementById('pinTitle').textContent=isOverdueReturn?'ยืนยันด้วยรหัส PIN 2 ชุด':'กรอกรหัส PIN';
+  document.getElementById('pinSub').textContent=isOverdueReturn?'กุญแจนี้เกินกำหนดคืน ต้องยืนยันด้วย PIN 2 คนที่ไม่ซ้ำกัน':'ยืนยันตัวตนก่อนคืนกุญแจ';
+  document.getElementById('pinRowLabel1').style.display=isOverdueReturn?'block':'none';
+  document.getElementById('pinRow2').style.display=isOverdueReturn?'block':'none';
+  document.getElementById('pinOverlay').style.display='flex';
+  setTimeout(()=>document.getElementById('pinInput').focus(),50);
+}
+function closePinModal(){
+  document.getElementById('pinOverlay').style.display='none';
+}
+function verifyPin(){
+  const val1=document.getElementById('pinInput').value;
+  if(!isOverdueReturn){
+    if(VALID_PINS.includes(val1)){
+      closePinModal();
+      doConfirmReturn();
+    }else{
+      showPinError('รหัส PIN ไม่ถูกต้อง');
+    }
+    return;
+  }
+  const val2=document.getElementById('pinInput2').value;
+  if(!VALID_PINS.includes(val1)||!VALID_PINS.includes(val2)){
+    showPinError('รหัส PIN ไม่ถูกต้อง');
+    return;
+  }
+  if(val1===val2){
+    showPinError('ต้องใช้รหัส PIN ที่ไม่ซ้ำกัน 2 คน');
+    return;
+  }
+  closePinModal();
+  doConfirmReturn();
+}
+function showPinError(msg){
+  const el=document.getElementById('pinError');
+  el.textContent=msg;el.style.visibility='visible';
+  document.getElementById('pinInput').value='';
+  document.getElementById('pinInput2').value='';
+  document.getElementById('pinInput').focus();
+}
+function doConfirmReturn(){
+  if(!hasSig||!pendingReturnKey)return;
+  const key=pendingReturnKey;
+  const entry=borrowedMap[key];
+  if(!entry)return;
+  const overdue=(Date.now()-entry.borrowedAt)>LOCK_MS;
+  const reason=overdue?document.getElementById('overdueReason').value.trim():'';
+  const now=new Date();const tm=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+  borrowedRef.child(keyNode(key)).transaction(current=>{
+    if(current===null||current.borrowedAt!==entry.borrowedAt)return;
+    return null;
+  },(error,committed)=>{
+    if(error){alert('เกิดข้อผิดพลาด กรุณาลองใหม่: '+error.message);return;}
+    if(!committed){
+      alert('ข้อมูลกุญแจนี้เปลี่ยนแปลงจากเครื่องอื่นแล้ว กรุณาลองใหม่');
+      backToReturnList();
+      return;
+    }
+    pendingReturnKey=null;
+    addHistory({
+  ts:Date.now(),
+  type:'return',
+  key:entry.key,
+  name:entry.name,
+  dept:entry.dept,
+  status:overdue ? 'red' : 'green',
+  reason,
+  borrowedAt:entry.borrowedAt,
+  returnedAt:Date.now()
+});
+    document.getElementById('view-sign').style.display='none';
+    showSuccess(overdue?'⚠️':'🔑',overdue?'คืนกุญแจสำเร็จ (เกินกำหนด)':'คืนกุญแจสำเร็จ!','กุญแจ #'+entry.key+' คืนเรียบร้อยแล้ว',
+      `<div class="sc-row"><span class="sc-label">กุญแจ</span><span class="sc-val">#${entry.key}</span></div>
+       <div class="sc-row"><span class="sc-label">ผู้คืน</span><span class="sc-val">${entry.name}</span></div>
+       <div class="sc-row"><span class="sc-label">แผนก</span><span class="sc-val">${entry.dept}</span></div>
+       <div class="sc-row"><span class="sc-label">เวลาคืน</span><span class="sc-val">${tm} น.</span></div>`+
+      (overdue?`<div class="sc-row"><span class="sc-label">เหตุผลล่าช้า</span><span class="sc-val">${reason}</span></div>`:''),true);
+    buildKeyGrid();
+  });
+}
+
+function matchesHistCat(e,cat){
+  if(cat==='all')return true;
+  if(cat==='borrow')return e.type==='borrow';
+  if(cat==='warning')return e.type==='warning';
+  if(cat==='green')return e.type==='return'&&e.status==='green';
+  if(cat==='red')return e.type==='return'&&e.status==='red';
+  return true;
+}
+function switchHistCat(cat){
+  dashboardFilter=cat;
+  renderDashboard();
+}
+  
+function renderDashboard(){
+  document.querySelectorAll('.hist-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.cat===dashboardFilter));
+  const el=document.getElementById('dashboardList');
+  const h=loadHistory().filter(e=>matchesHistCat(e,dashboardFilter)).sort((a,b)=>b.ts-a.ts);
+  if(!h.length){el.innerHTML='<div class="empty"><p style="font-size:16px">ยังไม่มีประวัติในหมวดนี้</p></div>';return;}
+  const groups=[];
+  h.forEach(e=>{
+    const dayLabel=new Date(e.ts).toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+    let g=groups.find(g=>g.dayLabel===dayLabel);
+    if(!g){g={dayLabel,items:[]};groups.push(g);}
+    g.items.push(e);
+  });
+  el.innerHTML=groups.map(g=>
+    `<div class="dash-day">${g.dayLabel}</div><div class="return-card">`+
+    g.items.map(e=>{
+      const timeLabel=new Date(e.ts).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+      let rowClass='',badgeClass='',badgeLabel='';
+      if(e.type==='borrow'){badgeClass='borrow';badgeLabel='เบิก';}
+      else if(e.type==='warning'){rowClass='hist-yellow';badgeClass='warn';badgeLabel='แจ้งเตือน';}
+      else if(e.status==='red'){rowClass='hist-red';badgeClass='return-late';badgeLabel='คืนเกินกำหนด';}
+      else{rowClass='hist-green';badgeClass='return-b';badgeLabel='คืนตรงเวลา';}
+      const reasonHtml=(e.status==='red'&&e.reason)?`<div class="hist-reason">เหตุผล: ${e.reason}</div>`:'';
+      return `<div class="return-item ${rowClass}">
+        <div><div class="ri-key"><span class="dash-badge ${badgeClass}">${badgeLabel}</span>กุญแจ #${e.key}</div><div class="ri-meta">${e.name} (${e.dept}) · ${timeLabel} น.</div>${reasonHtml}</div>
+      </div>`;
+    }).join('')+
+    '</div>'
+  ).join('');
+}
+
+function goDashboardFromSuccess(){
+  document.getElementById('view-success').style.display='none';
+  switchTab('dashboard');
+}
+
+function showSuccess(icon,title,sub,cardHtml,isReturn){
+  ['view-borrow','view-return','view-sign','view-dashboard'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('view-success').style.display='block';
+  document.getElementById('successIcon').textContent=icon;
+  document.getElementById('successTitle').textContent=title;
+  document.getElementById('successSub').textContent=sub;
+  document.getElementById('successCard').innerHTML=cardHtml;
+  document.getElementById('successDashboardBtn').style.display=isReturn?'block':'none';
+}
+
+function switchTab(t){
+  currentTab=t;
+  document.getElementById('tab-borrow').classList.toggle('active',t==='borrow');
+  document.getElementById('tab-return').classList.toggle('active',t==='return');
+  document.getElementById('tab-dashboard').classList.toggle('active',t==='dashboard');
+  ['view-borrow','view-return','view-sign','view-success','view-dashboard'].forEach(id=>document.getElementById(id).style.display='none');
+  if(t==='borrow')document.getElementById('view-borrow').style.display='block';
+  else if(t==='return'){document.getElementById('view-return').style.display='block';renderReturn();}
+  else{document.getElementById('view-dashboard').style.display='block';renderDashboard();}
+}
+
+function goHome(){
+  ['view-success','view-sign'].forEach(id=>document.getElementById(id).style.display='none');
+  switchTab(currentTab==='dashboard'?'borrow':currentTab);
+}
+
+init();
+</script>
+</body>
+</html>
