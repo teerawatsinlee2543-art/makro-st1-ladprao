@@ -3,7 +3,7 @@
 <head><script>/* ST1 Ladprao: own browser storage (same github.io origin as the other Makro apps) */(function(){var P="st1.";try{var S=Storage.prototype,g=S.getItem,s=S.setItem,r=S.removeItem;S.getItem=function(k){return g.call(this,P+k)};S.setItem=function(k,v){return s.call(this,P+k,v)};S.removeItem=function(k){return r.call(this,P+k)};S.clear=function(){var a=[],i,k;for(i=0;i<this.length;i++){k=this.key(i);if(k&&k.indexOf(P)===0)a.push(k)}for(i=0;i<a.length;i++)r.call(this,a[i])}}catch(e){}try{var F=IDBFactory.prototype,o=F.open,d=F.deleteDatabase;F.open=function(n){var a=Array.prototype.slice.call(arguments);a[0]=P+n;return o.apply(this,a)};F.deleteDatabase=function(n){var a=Array.prototype.slice.call(arguments);a[0]=P+n;return d.apply(this,a)}}catch(e){}})();</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>เบิกกุญแจโฟล์คลิฟท์ - Makro ST 1</title>
+<title>เบิกกุญแจ - Makro ST 1</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{--red:#E8192C;--red-dark:#C01020;--red-light:#FFF0F1;--green:#006E33;--green-light:#F0FAF4}
@@ -104,7 +104,7 @@ textarea.inp{min-height:70px;resize:vertical;font-family:inherit}
   <div class="hdr">
     <div style="font-size:22px;font-weight:600;color:#fff;letter-spacing:.04em;margin-bottom:2px">ST. 1 ลาดพร้าว</div>
     <div class="hdr-icon">🔑</div>
-    <div class="hdr-title">เบิกกุญแจโฟล์คลิฟท์</div>
+    <div class="hdr-title">เบิกกุญแจ</div>
     <div class="hdr-date" id="hdrDate"></div>
   </div>
   <div class="tabs">
