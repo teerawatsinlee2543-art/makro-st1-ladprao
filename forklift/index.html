@@ -135,9 +135,20 @@ textarea.inp{min-height:70px;resize:vertical;font-family:inherit}
         <option value="O2O">O2O</option>
         <option value="SAFETY">SAFETY</option>
       </select>
-      <div class="field-label">เลขบัตรใบอนุญาตขับโฟล์คลิฟท์ <span class="req">*</span></div>
-      <input class="inp" type="tel" id="licenseNo" maxlength="5" placeholder="กรอกเลขใบอนุญาต 5 หลัก" oninput="onLicense(this)">
-      <div class="warning">⚠️ ต้องกรอกเลขใบอนุญาต 5 หลักก่อนจึงจะเบิกได้</div>
+      <div class="field-label">ประเภทกุญแจ <span class="req">*</span></div>
+      <select class="inp" id="keyType" onchange="onKeyType()">
+        <option value="">เลือกประเภทกุญแจ</option>
+        <option value="forklift-floor">โฟล์คลิฟท์ใน floor</option>
+        <option value="forklift-diesel">โฟล์คลิฟท์น้ำมัน</option>
+        <option value="tent">กุญแจเต้นท์</option>
+        <option value="trash">กุญแจห้องขยะ</option>
+        <option value="other">อื่นๆ</option>
+      </select>
+      <div id="licenseWrap" style="display:none">
+        <div class="field-label">เลขบัตรใบอนุญาตขับโฟล์คลิฟท์ <span class="req">*</span></div>
+        <input class="inp" type="tel" id="licenseNo" maxlength="5" placeholder="กรอกเลขใบอนุญาต 5 หลัก" oninput="onLicense(this)">
+      </div>
+      <div class="warning" id="borrowWarn">⚠️ ต้องเลือกประเภทกุญแจก่อนจึงจะเบิกได้</div>
       <button class="submit-btn borrow" id="borrowBtn" disabled onclick="submitBorrow()">✓ ยืนยันการเบิกกุญแจ</button>
     </div>
     <div id="view-return" style="display:none">
@@ -289,6 +300,7 @@ function exportHistoryCSV(){
     'เวลาคืน',
     'ประเภท',
     'หมายเลขกุญแจ',
+    'ประเภทกุญแจ',
     'ชื่อ-สกุล',
     'แผนก',
     'เหตุผลคืนช้า'
@@ -306,6 +318,7 @@ function exportHistoryCSV(){
       returnDate ? returnDate.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'}) : '',
       e.status === 'red' ? 'คืนเกินกำหนด' : 'คืนตรงเวลา',
       e.key,
+      e.keyType || '',
       e.name,
       e.dept,
       e.reason || ''
@@ -368,7 +381,7 @@ function tick(){
           if(cur===true)return;
           return true;
         },(error,committed)=>{
-          if(!error&&committed)addHistory({ts:Date.now(),type:'warning',key:b.key,name:b.name,dept:b.dept});
+          if(!error&&committed)addHistory({ts:Date.now(),type:'warning',key:b.key,name:b.name,dept:b.dept,keyType:b.keyType||''});
         });
       }
     }
@@ -416,15 +429,38 @@ function buildKeyGrid(){
   }
 }
 function selectKey(k){if(borrowedMap[k])return;selectedKey=selectedKey===k?null:k;buildKeyGrid();validateBorrow();}
+/* key types: the two forklift types need the 5-digit forklift licence number, the others do not */
+const KEY_TYPES={
+  'forklift-floor':{label:'โฟล์คลิฟท์ใน floor',forklift:true},
+  'forklift-diesel':{label:'โฟล์คลิฟท์น้ำมัน',forklift:true},
+  'tent':{label:'กุญแจเต้นท์',forklift:false},
+  'trash':{label:'กุญแจห้องขยะ',forklift:false},
+  'other':{label:'อื่นๆ',forklift:false}
+};
+function curKeyType(){return KEY_TYPES[document.getElementById('keyType').value]||null;}
+function onKeyType(){
+  const t=curKeyType();
+  document.getElementById('licenseWrap').style.display=(t&&t.forklift)?'block':'none';
+  if(!(t&&t.forklift))document.getElementById('licenseNo').value='';
+  validateBorrow();
+}
 function onLicense(el){el.value=el.value.replace(/\D/g,'');validateBorrow();}
 function validateBorrow(){
-  const ok=selectedKey&&document.getElementById('borrowName').value.trim().length>1&&document.getElementById('borrowDept').value&&document.getElementById('licenseNo').value.length===5;
+  const t=curKeyType();
+  const licOk=!(t&&t.forklift)||document.getElementById('licenseNo').value.length===5;
+  const ok=selectedKey&&document.getElementById('borrowName').value.trim().length>1&&document.getElementById('borrowDept').value&&t&&licOk;
   document.getElementById('borrowBtn').disabled=!ok;
+  const w=document.getElementById('borrowWarn');
+  if(!t){w.textContent='⚠️ ต้องเลือกประเภทกุญแจก่อนจึงจะเบิกได้';w.style.display='';}
+  else if(!licOk){w.textContent='⚠️ ต้องกรอกเลขใบอนุญาต 5 หลักก่อนจึงจะเบิกได้';w.style.display='';}
+  else w.style.display='none';
 }
 function submitBorrow(){
   const now=new Date();const tm=now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
   const key=selectedKey;
-  const entry={key,name:document.getElementById('borrowName').value.trim(),dept:document.getElementById('borrowDept').value,license:document.getElementById('licenseNo').value,time:tm,borrowedAt:Date.now(),notified30:false};
+  const kt=curKeyType();
+  if(!kt)return;
+  const entry={key,name:document.getElementById('borrowName').value.trim(),dept:document.getElementById('borrowDept').value,keyType:kt.label,license:kt.forklift?document.getElementById('licenseNo').value:'',time:tm,borrowedAt:Date.now(),notified30:false};
   document.getElementById('borrowBtn').disabled=true;
   borrowedRef.child(keyNode(key)).transaction(current=>{
     if(current!==null)return;
@@ -442,6 +478,7 @@ function submitBorrow(){
   key:entry.key,
   name:entry.name,
   dept:entry.dept,
+  keyType:entry.keyType,
   license:entry.license,
   borrowedAt:entry.borrowedAt
 });
@@ -450,12 +487,15 @@ function submitBorrow(){
       `<div class="sc-row"><span class="sc-label">กุญแจ</span><span class="sc-val">#${entry.key}</span></div>
        <div class="sc-row"><span class="sc-label">ผู้เบิก</span><span class="sc-val">${entry.name}</span></div>
        <div class="sc-row"><span class="sc-label">แผนก</span><span class="sc-val">${entry.dept}</span></div>
-       <div class="sc-row"><span class="sc-label">ใบอนุญาต</span><span class="sc-val">${entry.license}</span></div>
+       <div class="sc-row"><span class="sc-label">ประเภท</span><span class="sc-val">${entry.keyType}</span></div>
+       ${entry.license?`<div class="sc-row"><span class="sc-label">ใบอนุญาต</span><span class="sc-val">${entry.license}</span></div>`:''}
        <div class="sc-row"><span class="sc-label">เวลา</span><span class="sc-val">${entry.time} น.</span></div>`,false);
     selectedKey=null;
     document.getElementById('borrowName').value='';
     document.getElementById('borrowDept').value='';
+    document.getElementById('keyType').value='';
     document.getElementById('licenseNo').value='';
+    onKeyType();
     buildKeyGrid();
   });
 }
@@ -476,7 +516,7 @@ function renderReturn(){
         :`<div class="lock-badge${remain<=WARN_LEAD?' soon':''}">ครบกำหนดใน ${fmtRemain(remain)}</div>`;
       return `
       <div class="return-item">
-        <div><div class="ri-key">กุญแจ #${b.key}</div><div class="ri-meta">${b.name} (${b.dept}) · เบิก ${b.time} น.</div></div>
+        <div><div class="ri-key">กุญแจ #${b.key}</div><div class="ri-meta">${b.name} (${b.dept})${b.keyType?' · '+b.keyType:''} · เบิก ${b.time} น.</div></div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
           ${statusTag}
           <button class="ri-btn" onclick="openSignature(${b.key})">เลือก</button>
@@ -497,6 +537,7 @@ function openSignature(key){
     `<div class="sc-row"><span class="sc-label">กุญแจ</span><span class="sc-val">#${entry.key}</span></div>
      <div class="sc-row"><span class="sc-label">ผู้เบิก</span><span class="sc-val">${entry.name}</span></div>
      <div class="sc-row"><span class="sc-label">แผนก</span><span class="sc-val">${entry.dept}</span></div>
+     ${entry.keyType?`<div class="sc-row"><span class="sc-label">ประเภท</span><span class="sc-val">${entry.keyType}</span></div>`:''}
      <div class="sc-row"><span class="sc-label">เวลาเบิก</span><span class="sc-val">${entry.time} น.</span></div>`;
   document.getElementById('overdueBlock').style.display=isOverdueReturn?'block':'none';
   document.getElementById('overdueReason').value='';
@@ -680,6 +721,7 @@ function doConfirmReturn(){
   key:entry.key,
   name:entry.name,
   dept:entry.dept,
+  keyType:entry.keyType||'',
   status:overdue ? 'red' : 'green',
   reason,
   borrowedAt:entry.borrowedAt,
@@ -732,7 +774,7 @@ function renderDashboard(){
       else{rowClass='hist-green';badgeClass='return-b';badgeLabel='คืนตรงเวลา';}
       const reasonHtml=(e.status==='red'&&e.reason)?`<div class="hist-reason">เหตุผล: ${e.reason}</div>`:'';
       return `<div class="return-item ${rowClass}">
-        <div><div class="ri-key"><span class="dash-badge ${badgeClass}">${badgeLabel}</span>กุญแจ #${e.key}</div><div class="ri-meta">${e.name} (${e.dept}) · ${timeLabel} น.</div>${reasonHtml}</div>
+        <div><div class="ri-key"><span class="dash-badge ${badgeClass}">${badgeLabel}</span>กุญแจ #${e.key}</div><div class="ri-meta">${e.name} (${e.dept})${e.keyType?' · '+e.keyType:''} · ${timeLabel} น.</div>${reasonHtml}</div>
       </div>`;
     }).join('')+
     '</div>'
